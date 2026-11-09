@@ -6,6 +6,7 @@
 
 #include "audio_core/audio_core.h"
 #include "audio_core/sink/sink_details.h"
+#include "common/logging.h"
 #include "common/settings.h"
 #include "core/core.h"
 
@@ -25,10 +26,16 @@ AudioCore ::~AudioCore() {
 void AudioCore::CreateSinks() {
     const auto& sink_id{Settings::values.sink_id};
     const auto& audio_output_device_id{Settings::values.audio_output_device_id};
-    const auto& audio_input_device_id{Settings::values.audio_input_device_id};
 
     output_sink = Sink::CreateSinkFromID(sink_id.GetValue(), audio_output_device_id.GetValue());
+#ifdef __ANDROID__
+    // Android has no microphone permission flow; SDL capture can block waiting for permission.
+    input_sink = Sink::CreateSinkFromID(Settings::AudioEngine::Null, {});
+    LOG_INFO(Audio, "Microphone capture is unavailable on Android, using silent input");
+#else
+    const auto& audio_input_device_id{Settings::values.audio_input_device_id};
     input_sink = Sink::CreateSinkFromID(sink_id.GetValue(), audio_input_device_id.GetValue());
+#endif
     input_sink->SetDeviceVolume(Settings::values.microphone_volume.GetValue() / 100.0f);
 }
 

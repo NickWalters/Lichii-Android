@@ -1,5 +1,15 @@
 # Microphone input
 
+## Android
+
+Android currently uses a silent input sink while retaining the selected playback backend.
+The app does not declare or request microphone permission, and opening SDL's OpenSL ES
+recorder can block waiting for a permission response. A successful silent input stream
+allows games such as Ocarina to boot without rejecting their microphone stream.
+Real microphone capture is not supported on Android yet. Desktop capture is unchanged.
+
+## Desktop
+
 Configure -> Controls -> Microphone selects the host input device, adjusts input gain
 (0–200%, 100% is unchanged PCM), and provides a start/stop level test. The test uses
 the same audio backend and gain conversion as capture, works while emulation is

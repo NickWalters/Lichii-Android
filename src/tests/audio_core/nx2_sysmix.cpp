@@ -5,6 +5,7 @@
 #include <limits>
 #include <thread>
 #include <catch2/catch_test_macros.hpp>
+#include "audio_core/sink/null_sink.h"
 #include "common/atomic_ops.h"
 #include "common/scope_exit.h"
 #include "core/core_timing.h"
@@ -22,6 +23,35 @@ TEST_CASE("sysmix input accepts a ring without output timestamp storage", "[sysm
     SysmixOutput stream{context.system, *context.process, context.sink, 2,
                         Context::Base, 0x2000, 2, true};
     REQUIRE(stream.Open(2, 1, 48000, 2000, 0, 0).IsSuccess());
+}
+
+TEST_CASE("sysmix input on the null sink opens silently and reopens", "[sysmix][input]") {
+    Context context;
+    AudioCore::Sink::NullSink sink{"null"};
+    const u32 cursor = 0;
+    REQUIRE(context.Memory().WriteBlock(Context::Base + 0x44, &cursor, sizeof(cursor)));
+    REQUIRE(context.Memory().WriteBlock(Context::Base + 0x1004, &cursor, sizeof(cursor)));
+    SysmixOutput stream{
+        context.system, *context.process, sink, 2, Context::Base, Context::Size, 2, true};
+    REQUIRE(stream.Open(2, 1, 48000, 8, 0, 0).IsSuccess());
+    REQUIRE(stream.SetDataNotification(2, 2).IsSuccess());
+    REQUIRE(stream.SetEngaged(true).IsSuccess());
+    stream.Pump();
+    u32 write{};
+    REQUIRE(context.Memory().Read32Acquire(Context::Base + 0x1004, write));
+    REQUIRE(write == 0);
+    REQUIRE(stream.GetCounters().accepted_frames == 0);
+    u32 purged{};
+    REQUIRE(stream.Purge(0, purged).IsSuccess());
+    REQUIRE(purged == 0);
+    REQUIRE(stream.SetEngaged(false).IsSuccess());
+    stream.Close();
+    REQUIRE(stream.Open(2, 1, 48000, 8, 0, 0).IsSuccess());
+    REQUIRE(stream.SetEngaged(true).IsSuccess());
+    stream.Pump();
+    REQUIRE(context.Memory().Read32Acquire(Context::Base + 0x1004, write));
+    REQUIRE(write == 0);
+    REQUIRE(stream.GetCounters().accepted_frames == 0);
 }
 
 TEST_CASE("sysmix input publishes fresh mono capture across ring wrap", "[sysmix][input]") {
