@@ -1,4 +1,4 @@
-# Android boot fix (after 0.4.0)
+# Lichii for Android 0.4.1
 
 - Fixes an Ocarina of Time startup hang with SDL audio. The imported microphone path
   could wait indefinitely for an Android recording-permission response. Android now
@@ -7,13 +7,23 @@
 - Device check: nubia NP06J / Adreno 840 / Turnip, SDL enabled, reached the title menu
   at approximately 60 fps. All 999 host test cases passed, including silent-input
   open, engage, pump, purge, close and reopen coverage.
-- Gameplay validation is incomplete. A separate Kokiri Forest run with audio disabled
-  showed magenta lighting and approximately 14–15 fps. The original white-flash issue
-  has not been confirmed resolved on this device.
+- Retested on the same phone with SDL enabled: both Fast and High GPU accuracy boot
+  and load the Kokiri Forest save. With Banners AIO, colours are normal. The tester
+  reports the white flashes are gone in Fast mode; this is not a claim of full-game
+  or all-device validation.
+- Recommended for this tested setup: **Fast GPU accuracy** and
+  **Turnip-v27.0.0-20261107-Banners-AIO**. The experimental OOT Broadcast driver
+  produced persistent magenta lighting in the earlier run; use Banners AIO instead.
+- Known limitation: the tested Kokiri Forest scene runs at approximately 12–16 fps
+  on this device. Fast mode did not show a clear speed improvement in this scene.
 
-# Lichii for Android 0.4.0
+The upstream imports and fork optimisations from 0.4.0 are retained. Install over
+the existing plain **Lichii** app; this release does not bundle games, keys, firmware
+or a GPU driver.
 
-Merges the latest Lichii (Zortos) `nx2` code, up to `bf48fe92cc` (8 Nov 2026), into the Android fork. Not yet validated on a device.
+## Previous release: 0.4.0
+
+Merged Lichii (Zortos) `nx2` code up to `bf48fe92cc` (8 Nov 2026) into the Android fork.
 
 ## Highlights
 
@@ -33,7 +43,7 @@ Merges the latest Lichii (Zortos) `nx2` code, up to `bf48fe92cc` (8 Nov 2026), i
 
 ## Known issues
 
-- On-device testing of this release is still pending. Please report whether the white flashes in Ocarina of Time are gone on your phone.
+- Wider on-device testing remains needed; the 0.4.1 results above cover one phone and one gameplay scene.
 - **Recommended:** a phone with **16 GB of RAM**.
 
 ## For testers

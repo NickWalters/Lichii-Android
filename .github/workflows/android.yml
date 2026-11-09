@@ -69,6 +69,9 @@ jobs:
           CPM_SOURCE_CACHE: ${{ github.workspace }}/.cache/cpm
         run: |
           chmod +x .ci/android/build.sh
+          if [[ "$GITHUB_REF" == refs/tags/android-* && "$GITHUB_REF_NAME" != android-latest ]]; then
+            export GIT_TAG_NAME="$GITHUB_REF_NAME"
+          fi
           .ci/android/build.sh -t standard -b Release
 
       - name: ccache stats
